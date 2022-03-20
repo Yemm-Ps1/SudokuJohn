@@ -47,8 +47,11 @@ func initialize_game(seedo):
 func _ready():
 	initialize_game(sudoku_seed)
 
-func _get_single_candidate():
-	pass
+func get_single_candidate():
+	for x in row:
+		for y in col:
+			if numbers[x][y] == null:
+				print(x, y)
 
 func check_errors():
 	var duped = false
@@ -96,8 +99,13 @@ func _init_grid():
 			panel.rect_position = Vector2(size * y, size * x) + Vector2(offset_x, offset_y)
 			add_child(panel)
 
+func _clear_numbers():
+	for x in row:
+		for y in col:
+			numbers[x][y] = null
 
 func _init_numbers():
+	_clear_numbers()
 	for n in 3:
 		var candidates = [1, 2, 3, 4, 5, 6, 7, 8, 9]
 		candidates.shuffle()
@@ -123,8 +131,9 @@ func _get_empty():
 
 
 func _fill_empty():
-	var x = _get_empty()[0]
-	var y = _get_empty()[1]
+	var empty = _get_empty() 
+	var x = empty[0]
+	var y = empty[1]
 	if !x and !y:
 		return true
 	

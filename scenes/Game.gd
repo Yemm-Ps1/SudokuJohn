@@ -43,6 +43,6 @@ func _rect_fade():
 		check_rect.visible = false
 
 func _on_Hint_pressed():
-	pass # Replace with function body.
+	sudoku.get_single_candidate()
 
 
