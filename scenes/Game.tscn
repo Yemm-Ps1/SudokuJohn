@@ -1,0 +1,98 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://scenes/Sudoku.tscn" type="PackedScene" id=1]
+[ext_resource path="res://scenes/Game.gd" type="Script" id=2]
+
+[node name="Game" type="CanvasLayer"]
+script = ExtResource( 2 )
+
+[node name="HSplitContainer" type="VSplitContainer" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+split_offset = 500
+dragger_visibility = 2
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="HBoxContainer3" type="HBoxContainer" parent="HSplitContainer"]
+margin_right = 1040.0
+margin_bottom = 500.0
+
+[node name="LeftMargin" type="MarginContainer" parent="HSplitContainer/HBoxContainer3"]
+margin_right = 272.0
+margin_bottom = 500.0
+size_flags_vertical = 3
+custom_constants/margin_right = 272
+
+[node name="Sudoku" parent="HSplitContainer/HBoxContainer3" instance=ExtResource( 1 )]
+margin_left = 276.0
+margin_right = 1040.0
+margin_bottom = 500.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="HBoxContainer" type="HBoxContainer" parent="HSplitContainer"]
+margin_top = 500.0
+margin_right = 1040.0
+margin_bottom = 600.0
+
+[node name="LeftMargin" type="MarginContainer" parent="HSplitContainer/HBoxContainer"]
+margin_right = 475.0
+margin_bottom = 100.0
+size_flags_horizontal = 3
+custom_constants/margin_right = 475
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HSplitContainer/HBoxContainer"]
+margin_left = 479.0
+margin_right = 561.0
+margin_bottom = 100.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="NewGame" type="Button" parent="HSplitContainer/HBoxContainer/VBoxContainer"]
+margin_right = 82.0
+margin_bottom = 20.0
+focus_mode = 0
+size_flags_horizontal = 5
+size_flags_vertical = 5
+enabled_focus_mode = 0
+text = "New Game"
+
+[node name="Check" type="Button" parent="HSplitContainer/HBoxContainer/VBoxContainer"]
+margin_top = 24.0
+margin_right = 82.0
+margin_bottom = 44.0
+focus_mode = 0
+size_flags_horizontal = 5
+size_flags_vertical = 4
+enabled_focus_mode = 0
+text = "Check"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Hint" type="Button" parent="HSplitContainer/HBoxContainer/VBoxContainer"]
+margin_top = 48.0
+margin_right = 82.0
+margin_bottom = 68.0
+focus_mode = 0
+size_flags_horizontal = 5
+size_flags_vertical = 4
+enabled_focus_mode = 0
+text = "Hint"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="RightMargin" type="MarginContainer" parent="HSplitContainer/HBoxContainer"]
+margin_left = 565.0
+margin_right = 1040.0
+margin_bottom = 100.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+custom_constants/margin_left = 475
+
+[connection signal="pressed" from="HSplitContainer/HBoxContainer/VBoxContainer/NewGame" to="." method="_on_NewGame_pressed"]
+[connection signal="pressed" from="HSplitContainer/HBoxContainer/VBoxContainer/Check" to="." method="_on_Check_pressed"]
+[connection signal="pressed" from="HSplitContainer/HBoxContainer/VBoxContainer/Hint" to="." method="_on_Hint_pressed"]
