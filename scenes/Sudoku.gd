@@ -9,49 +9,93 @@ var size = 50
 
 var offset = 3
 
-var numbers = _create_multidim_array(row, col)
-var panels = _create_multidim_array(row, col)
+var numbers = _create_multidim_array(row, col-1)
+var panels = _create_multidim_array(row, col-1)
 
 var valid_numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9]
 
+var modifiers = ["!", "\"", "£", "$", "%", "^", "&", "*", "("]
+
 var sudoku_seed = 1
 
+var solved = false
 
+func _check_solved():
+	if numbers == solved_numbers:
+		solved = true
+		return true
+	return false
 
+var shifted = false
 func _unhandled_input(event):
-	if event is InputEventKey and event.is_pressed():
+	if event is InputEventKey:
 		var typed_event = event as InputEventKey
-		var key_typed = PoolByteArray([typed_event.unicode]).get_string_from_utf8()
-		if int(key_typed) in valid_numbers:
-			if selected_panel:
-				selected_panel.set_label_text(key_typed)
-		if key_typed == " " or typed_event.scancode == KEY_BACKSPACE or typed_event.scancode == KEY_DELETE:
-			if selected_panel:
-				selected_panel.set_label_text(" ")
-		_update_numbers()
+		var key_typed
+		if typed_event.unicode == 163:
+			key_typed = "3"
+		else:
+			key_typed = PoolByteArray([typed_event.unicode]).get_string_from_utf8()
+		
+		if typed_event.is_action_pressed("shift"):
+			print("SHIFTED")
+			shifted = true
+		elif typed_event.is_action_released("shift"):
+			print("UNSHIFTED")
+			shifted = false
+		if event.is_pressed():
+			if key_typed in modifiers:
+				key_typed = str(valid_numbers[modifiers.find(key_typed)])
+			if int(key_typed) in valid_numbers:
+				if selected_panel:
+					if shifted:
+						selected_panel.add_hint_label(key_typed)
+					else:
+						selected_panel.set_label_text(key_typed)
+			if key_typed == " " or typed_event.scancode == KEY_BACKSPACE or typed_event.scancode == KEY_DELETE:
+				if selected_panel:
+					selected_panel.set_label_text(" ")
+			_update_numbers()
+			remove_redundant_marks()
 
 func _update_numbers():
 	for x in row:
 		for y in col:
 			numbers[x][y] = panels[x][y].get_label()
+	_init_panels()
 
+var solved_numbers = []
 func initialize_game(seedo):
+	solved = false
 	for n in get_children():
 		remove_child(n)
 	seed(seedo)
 	_init_grid()
 	_init_numbers()
+	solved_numbers = numbers.duplicate(true)
 	_clean_numbers()
+
 	_init_panels()
+
 
 func _ready():
 	initialize_game(sudoku_seed)
-
-func get_single_candidate():
+	
+func solve_single_candidate():
 	for x in row:
 		for y in col:
 			if numbers[x][y] == null:
-				print(x, y)
+				var candidates = _get_candidates(x, y)
+				if candidates.size() == 1:
+					numbers[x][y] = candidates[0]
+					_init_panels()
+					return
+
+
+
+func solve():
+	#numbers = solved_numbers
+	_fill_empty()
+	_init_panels()
 
 func check_errors():
 	var duped = false
@@ -99,6 +143,22 @@ func _init_grid():
 			panel.rect_position = Vector2(size * y, size * x) + Vector2(offset_x, offset_y)
 			add_child(panel)
 
+func mark():
+	for x in row:
+		for y in col:
+			if !numbers[x][y]:
+				panels[x][y].set_hint_labels(_get_candidates(x, y))
+			else:
+				panels[x][y].set_hint_labels([])
+
+func remove_redundant_marks():
+	for x in row:
+		for y in col:
+			var marks = panels[x][y].get_hint_labels()
+			var redundant = compare_array(marks, _get_candidates(x, y))
+			if redundant:
+				panels[x][y].remove_hint_labels(redundant)
+
 func _clear_numbers():
 	for x in row:
 		for y in col:
@@ -115,12 +175,16 @@ func _init_numbers():
 				numbers[x][y] = candidates.pop_front()
 	_fill_empty()
 
+var base_puzzle = []
+
 func _clean_numbers():
 	for x in row:
 		for y in col:
 			var candidates = _get_candidates(x, y)
 			if candidates.empty():
 				numbers[x][y] = null
+	base_puzzle = numbers.duplicate(true)
+
 
 func _get_empty():
 	for x in row:
@@ -131,14 +195,13 @@ func _get_empty():
 
 
 func _fill_empty():
-	var empty = _get_empty() 
+	var empty = _get_empty()
 	var x = empty[0]
 	var y = empty[1]
-	if !x and !y:
+	if x == null and y == null:
 		return true
 	
 	var candidates = _get_candidates(x, y)
-	
 	if !candidates:
 		return false
 		
@@ -148,6 +211,7 @@ func _fill_empty():
 			return true
 		else:
 			numbers[x][y] = null
+	
 
 
 func _init_panels():
@@ -157,13 +221,17 @@ func _init_panels():
 		for y in col:
 			var panel = panel_instances[i]
 			panel.connect("selected", self, "_on_Panel_selected")
+			panel.init_hint_labels(Vector2(size, size))
 			var label = panel.get_node("Label")
 			label.text = str(numbers[x][y]) if numbers[x][y] else ""
 			label.rect_size = Vector2(size, size)
-			if numbers[x][y] != null:
+			if numbers[x][y] == base_puzzle[x][y] and numbers[x][y] != null:
 				panel.unselectable()
 			panels[x][y] = panel
 			i += 1
+	remove_redundant_marks()
+	_check_solved()
+		
 
 var selected_panel
 
@@ -174,7 +242,7 @@ func _on_Panel_selected(panel):
 		selected_panel.deselected()
 	selected_panel = panel
 	selected_panel.selected()
-	print("Panel Selected")
+
 
 func _get_candidates(x, y):
 	var candidates = valid_numbers

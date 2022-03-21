@@ -16,12 +16,17 @@ func _ready():
 	check_rect.rect_size = screen_size
 	check_rect.visible = false
 
+var time_elapsed = 0.0
 func _process(delta):
 	_rect_fade()
+	if !sudoku.solved:
+		time_elapsed += delta
+	$HSplitContainer/TimerLabel.text = str("%.1f" % stepify(time_elapsed, 0.1), " Seconds")
 
 
 func _on_NewGame_pressed():
 	var new_seed = randi()
+	time_elapsed = 0.0
 	sudoku.initialize_game(new_seed)
 
 
@@ -43,6 +48,14 @@ func _rect_fade():
 		check_rect.visible = false
 
 func _on_Hint_pressed():
-	sudoku.get_single_candidate()
+	sudoku.solve_single_candidate()
 
 
+
+
+func _on_Solve_pressed():
+	sudoku.solve()
+
+
+func _on_Mark_pressed():
+	sudoku.mark()

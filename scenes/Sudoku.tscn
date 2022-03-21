@@ -5,6 +5,7 @@
 [node name="Sudoku" type="Control"]
 margin_right = 468.0
 margin_bottom = 468.0
+rect_min_size = Vector2( 468, 468 )
 script = ExtResource( 1 )
 __meta__ = {
 "_edit_use_anchors_": false
